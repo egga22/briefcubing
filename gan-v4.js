@@ -234,7 +234,7 @@ var GanV4 = (function () {
         return { handle };
     }
 
-    async function connect(device, service, twistCallback) {
+    async function connect(device, service, twistCallback, diagnostics) {
         const mac = await findMac(device);
         const cipher = makeCipher(mac);
         const state = await service.getCharacteristic(STATE_UUID);
@@ -262,7 +262,10 @@ var GanV4 = (function () {
             return task;
         }
 
-        const tracker = createTracker(twistCallback, (start, count) => {
+        const tracker = createTracker(move => {
+            if (diagnostics) diagnostics({ type: "move", move: move });
+            twistCallback(move);
+        }, (start, count) => {
             const request = makeCommand(0xD1);
             request[2] = start;
             request[4] = count;
@@ -273,6 +276,7 @@ var GanV4 = (function () {
             if (!active) return;
             try {
                 const data = cipher.decrypt(event.target.value);
+                if (diagnostics) diagnostics({ type: "packet", packetType: data[0], bytes: data.length });
                 const isState = tracker.handle(data);
                 if (isState && !initialized) {
                     initialized = true;
