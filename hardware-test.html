@@ -153,7 +153,7 @@ $("connect").onclick=async()=>{
                 log("Packet type 0x"+diagnostic.packetType.toString(16)+" ("+diagnostic.bytes+" bytes)");
             }
         });
-        setStatus("pass","Connected; initialized with a valid decrypted cube state");
+        setStatus("pass","Connected; received initial cube-state notification");
         $("disconnect").disabled=false;
         log("Connected to "+(device.name||"unnamed GAN"));
     }catch(error){
